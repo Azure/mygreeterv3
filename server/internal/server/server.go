@@ -111,8 +111,6 @@ func StartServer(serverPort int, httpPort int, demoserverPort int) {
 		serverOptions.Port = serverPort
 		serverOptions.JsonLog = false
 		serverOptions.HTTPPort = httpPort
-		serverOptions.EnableAzureSDKCalls = true
-		serverOptions.SubscriptionID = "test"
 		if demoserverPort == -1 {
 			serverOptions.RemoteAddr = ""
 		} else {

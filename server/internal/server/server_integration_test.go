@@ -11,12 +11,9 @@ import (
 	"github.com/Azure/aks-middleware/interceptor"
 	pb "go.goms.io/aks/rp/mygreeterv3/api/v1"
 	"go.goms.io/aks/rp/mygreeterv3/api/v1/client"
-	"go.goms.io/aks/rp/mygreeterv3/api/v1/restsdk"
 	"go.goms.io/aks/rp/mygreeterv3/server/internal/logattrs"
 
 	log "log/slog"
-
-	"github.com/Azure/aks-middleware/restlogger"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -164,61 +161,6 @@ var _ = Describe("Interceptor test", func() {
 			var buf bytes.Buffer
 			sayHello(&buf, serverPort, in)
 			Expect(strings.Count(buf.String(), "request-id")).To(BeNumerically(">", 1)) // must retry
-		})
-	})
-})
-
-var _ = Describe("REST call test", func() {
-
-	var serverPort int
-	// var demoserverPort int
-	var httpPort int
-
-	BeforeEach(func() {
-		serverPort, httpPort, _ = AllocateDistinctPorts()
-		// StartDemoServer(demoserverPort)
-		// timeout := time.NewTimer(10 * time.Second)
-		// for {
-		// 	if IsServerRunning(demoserverPort) {
-		// 		break
-		// 	}
-		// 	time.Sleep(1 * time.Second)
-		// 	if !timeout.Stop() {
-		// 		<-timeout.C
-		// 		log.Error("Server startup check timed out")
-		// 		return
-		// 	}
-		// }
-		StartServer(serverPort, httpPort, -1)
-		Eventually(func() bool {
-			return IsServerRunning(serverPort) && IsServerRunning(httpPort) //&& IsServerRunning(demoserverPort)
-		}, 10*time.Second).Should(BeTrue())
-	})
-
-	Context("when sending a REST request", func() {
-		It("should return successfully when making SayHello call", func() {
-			logger := log.New(log.NewTextHandler(os.Stdout, nil))
-			// Create a new Configuration instance
-			cfg := &restsdk.Configuration{
-				BasePath:      fmt.Sprintf("http://0.0.0.0:%d", httpPort),
-				DefaultHeader: make(map[string]string),
-				UserAgent:     "Swagger-Codegen/1.0.0/go",
-				HTTPClient:    restlogger.NewLoggingClient(logger),
-			}
-
-			apiClient := restsdk.NewAPIClient(cfg)
-
-			service := apiClient.MyGreeterApi
-
-			helloRequestBody := restsdk.HelloRequest{
-				Name:  "MyName",
-				Age:   53,
-				Email: "test@test.com",
-			}
-			resp, _, err := service.MyGreeterSayHello(context.Background(), helloRequestBody)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(resp.Message).To(ContainSubstring("Echo back what you sent me (SayHello): MyName 53 test@test.com"))
 		})
 	})
 })

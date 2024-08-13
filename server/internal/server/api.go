@@ -5,14 +5,9 @@ import (
 	"os"
 
 	"github.com/Azure/aks-middleware/interceptor"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 	pb "go.goms.io/aks/rp/mygreeterv3/api/v1"
 	"go.goms.io/aks/rp/mygreeterv3/server/internal/logattrs"
 
-	serviceHubPolicy "github.com/Azure/aks-middleware/policy"
 	"go.goms.io/aks/rp/mygreeterv3/api/v1/client"
 )
 
@@ -26,9 +21,7 @@ type Server struct {
 	// When this struct is NOT embedded,, all methods have to be implemented to meet the interface requirement.
 	// See https://go.dev/ref/spec#Struct_types.
 	pb.UnimplementedMyGreeterServer
-	ResourceGroupClient *armresources.ResourceGroupsClient
-	AccountsClient      *armstorage.AccountsClient
-	client              pb.MyGreeterClient
+	client pb.MyGreeterClient
 }
 
 func NewServer() *Server {
@@ -37,40 +30,10 @@ func NewServer() *Server {
 
 func (s *Server) init(options Options) {
 	var err error
-	var cred azcore.TokenCredential
 
 	logger := log.New(log.NewTextHandler(os.Stdout, nil).WithAttrs(logattrs.GetAttrs()))
 	if options.JsonLog {
 		logger = log.New(log.NewJSONHandler(os.Stdout, nil).WithAttrs(logattrs.GetAttrs()))
-	}
-
-	log.SetDefault(logger)
-	if options.EnableAzureSDKCalls {
-		armClientOptions := serviceHubPolicy.GetDefaultArmClientOptions(logger)
-		// Use MSI in Standalone E2E env for credential
-		if options.IdentityResourceID != "" {
-			resourceID := azidentity.ResourceID(options.IdentityResourceID)
-			opts := azidentity.ManagedIdentityCredentialOptions{ID: resourceID}
-			cred, err = azidentity.NewManagedIdentityCredential(&opts)
-		} else {
-			cred, err = azidentity.NewDefaultAzureCredential(nil)
-		}
-		if err != nil {
-			log.Error(err.Error())
-			os.Exit(1)
-		}
-		resourcesClientFactory, err := armresources.NewClientFactory(options.SubscriptionID, cred, armClientOptions)
-		if err != nil {
-			log.Error(err.Error())
-			os.Exit(1)
-		}
-
-		s.ResourceGroupClient = resourcesClientFactory.NewResourceGroupsClient()
-		s.AccountsClient, err = armstorage.NewAccountsClient(options.SubscriptionID, cred, armClientOptions)
-		if err != nil {
-			log.Error(err.Error())
-			os.Exit(1)
-		}
 	}
 
 	if options.RemoteAddr != "" {

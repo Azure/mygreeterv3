@@ -25,7 +25,6 @@ func init() {
 	startCmd.Flags().StringVar(&options.RemoteAddr, "remote-addr", "", "the demo server's addr for this server to connect to")
 	startCmd.Flags().Int64Var(&options.IntervalMilliSec, "interval-milli-sec", options.IntervalMilliSec,
 		"The interval between two requests. Negative numbers mean sending one request.")
-	startCmd.Flags().StringVar(&options.IdentityResourceID, "identity-resource-id", "", "the MSI used to authenticate to Azure from E2E env")
 }
 
 func start(cmd *cobra.Command, args []string) {

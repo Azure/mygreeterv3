@@ -4,10 +4,6 @@ go 1.22.3
 
 require (
 	github.com/Azure/aks-middleware v0.0.21
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.11.0
-	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.5.2
-	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources v1.2.0
-	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage v1.5.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1
 	github.com/onsi/ginkgo/v2 v2.13.2
 	github.com/onsi/gomega v1.30.0

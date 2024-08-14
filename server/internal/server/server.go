@@ -14,16 +14,13 @@ import (
 	"go.goms.io/aks/rp/mygreeterv3/server/internal/logattrs"
 
 	"github.com/Azure/aks-middleware/interceptor"
-	"github.com/Azure/aks-middleware/policy"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 
 	log "log/slog"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/status"
 )
 
 func Serve(options Options) {
@@ -141,14 +138,4 @@ func IsServerRunning(port int) bool {
 		return true
 	}
 	return false
-}
-
-func HandleError(err error, operation string) error {
-	responseError, ok := err.(*azcore.ResponseError)
-	if ok {
-		code := policy.ConvertHTTPStatusToGRPCError(responseError.RawResponse.StatusCode)
-		return status.Errorf(code, "call error: "+err.Error())
-	} else {
-		return err
-	}
 }
